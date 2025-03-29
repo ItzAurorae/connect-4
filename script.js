@@ -16,6 +16,7 @@ const moveCountDisplay = document.getElementById("move-count");
 const mainMenu = document.getElementById("main-menu");
 const gameContainer = document.getElementById("game-container");
 const bgMusic = document.getElementById("bg-music");
+const startGameButton = document.getElementById("start-game");
 
 function setTheme(mode) {
     document.body.classList.toggle('dark-mode', mode === 'dark');
@@ -25,7 +26,7 @@ function setTheme(mode) {
 function setGameMode(mode) {
     gameMode = mode;
     document.getElementById("difficulty-selection").style.display = (mode === 'computer') ? "block" : "none";
-    document.getElementById("start-game").disabled = false;
+    startGameButton.disabled = false; // Enable the "Start Game" button once settings are selected
 }
 
 function setDifficulty(level) {
@@ -42,8 +43,11 @@ function toggleMusic() {
 }
 
 function startGame() {
+    // Hide the main menu and show the game board
     mainMenu.style.display = "none";
     gameContainer.style.display = "block";
+    
+    // Reset the game state
     resetGame();
 }
 
