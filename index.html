@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 🎮 Main Menu -->
+    <div id="main-menu">
+        <h1>Connect 4</h1>
+        
+        <label>Choose Theme:</label>
+        <button onclick="setTheme('light')">Light</button>
+        <button onclick="setTheme('dark')">Dark</button>
+        
+        <label>Game Mode:</label>
+        <button onclick="setGameMode('human')">2 Players</button>
+        <button onclick="setGameMode('computer')">Vs Computer</button>
+        
+        <div id="difficulty-selection" style="display: none;">
+            <label>AI Difficulty:</label>
+            <button onclick="setDifficulty('easy')">Easy</button>
+            <button onclick="setDifficulty('moderate')">Moderate</button>
+            <button onclick="setDifficulty('hard')">Hard</button>
+            <button onclick="setDifficulty('master')">Master</button>
+        </div>
+
+        <label>Background Music:</label>
+        <button onclick="toggleMusic()">Toggle Music</button>
+
+        <button id="start-game" onclick="startGame()" disabled>Start Game</button>
+    </div>
+
+    <!-- 🎲 Game Board -->
+    <div id="game-container" style="display: none;">
+        <h1>Connect 4</h1>
+        <div id="board"></div>
+        <div id="win-container">
+            <p id="win-message"></p>
+            <p id="game-duration"></p>
+            <p id="move-count"></p>
+            <button onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="background.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
