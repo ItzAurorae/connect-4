@@ -20,31 +20,33 @@ body {
 #main-menu {
   margin-top: 50px;
 }
-/* Hide the start screen on desktop */
- hide-on-desktop {
+
+#mobile-toggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.hide-on-desktop {
   display: none;
 }
 
-/* Hide mobile mode on desktop */
 @media (min-width: 768px) {
-  #start-screen {
+  #mobile-toggle {
     display: none;
   }
 }
 
-/* Show mobile mode on smaller screen sizes */
 @media (max-width: 767px) {
-  #start-screen {
+  #mobile-toggle {
     display: block;
   }
-  #main-menu {
-    display: none;
-  }
-}
-
-/* Hide main menu on mobile */
-.hide-on-mobile {
-  display: none;
 }
 
 /* Hide the main menu on mobile */
