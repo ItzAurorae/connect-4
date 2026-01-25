@@ -145,10 +145,22 @@ function updateGameSummary() {
     gameSummary.textContent = "Game Type: PvAI";
   }
 }
+// Switch between light and dark themes
+function setTheme(theme) {
+  document.body.classList.remove('dark-mode');
+  document.body.classList.remove('light-mode');
+  document.body.classList.add(theme + '-mode');
+}
 
-function setTheme(mode) {
-  document.body.classList.toggle('dark-mode', mode === 'dark');
-  document.body.classList.toggle('light-mode', mode === 'light');
+// Start the game
+function startGame() {
+  // Hide the start screen
+  document.getElementById('start-screen').classList.add('hide-on-mobile');
+  // Show the main menu
+  document.getElementById('main-menu').classList.remove('hide-on-mobile');
+  // Set the game mode and theme
+  setGameMode('human');
+  setTheme('light');
 }
 
 function setGameMode(mode) {
