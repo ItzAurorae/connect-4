@@ -25,9 +25,26 @@ body {
   display: none;
 }
 
-/* Show the main menu on desktop */
+/* Hide mobile mode on desktop */
+@media (min-width: 768px) {
+  #start-screen {
+    display: none;
+  }
+}
+
+/* Show mobile mode on smaller screen sizes */
+@media (max-width: 767px) {
+  #start-screen {
+    display: block;
+  }
+  #main-menu {
+    display: none;
+  }
+}
+
+/* Hide main menu on mobile */
 .hide-on-mobile {
-  display: block;
+  display: none;
 }
 
 /* Hide the main menu on mobile */
