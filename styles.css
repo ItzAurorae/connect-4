@@ -20,9 +20,29 @@ body {
 #main-menu {
   margin-top: 50px;
 }
+/* Hide the start screen on desktop */
+ hide-on-desktop {
+  display: none;
+}
 
+/* Show the main menu on desktop */
+.hide-on-mobile {
+  display: block;
+}
+
+/* Hide the main menu on mobile */
+.show-on-mobile {
+  display: block;
+}
+
+/* Improve menu layout */
 .menu-option {
-  margin: 15px;
+  margin-bottom: 1em;
+}
+
+/* Improve theme switcher */
+.theme-switcher {
+  margin-bottom: 1em;
 }
 
 /* Buttons */
