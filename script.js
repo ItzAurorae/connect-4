@@ -305,6 +305,21 @@ function goToMainMenu() {
   mainMenu.style.display = "block";
   resetGame(); // Reset the game when exiting
 }
+function detectDevice() {
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+
+  if (isMobile) {
+    document.body.classList.add('mobile');
+    document.body.classList.remove('desktop');
+  } else {
+    document.body.classList.add('desktop');
+    document.body.classList.remove('mobile');
+  }
+}
+
+// Run detection on page load
+window.addEventListener('load', detectDevice);
 
 // Initialize board on page load
 createBoard();
