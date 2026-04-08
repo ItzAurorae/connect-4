@@ -178,3 +178,17 @@ footer a {
 footer a:hover {
   text-decoration: underline;
 }
+/* Default styles */
+#main-menu {
+  /* styles for desktop */
+}
+
+/* For mobile devices */
+body.mobile #main-menu {
+  /* styles for mobile, e.g., smaller font, stacked layout, etc. */
+}
+
+/* For desktop devices */
+body.desktop #main-menu {
+  /* styles for desktop */
+}
