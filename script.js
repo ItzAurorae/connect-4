@@ -5,6 +5,7 @@ let board;
 let player;
 let mode = "pvp";
 let gameOver = false;
+let aiLocked = false;
 
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("status");
@@ -19,6 +20,8 @@ function reset() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
   player = 1;
   gameOver = false;
+  aiLocked = false;
+
   overlay.classList.add("hidden");
   render();
 }
@@ -33,69 +36,85 @@ function setMode(m) {
 }
 
 /* =========================
-   BOARD RENDER
+   RENDER
 ========================= */
 
 function render() {
   boardEl.innerHTML = "";
 
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
+  for (let c = 0; c < COLS; c++) {
+    const colDiv = document.createElement("div");
+    colDiv.className = "col";
+
+    for (let r = 0; r < ROWS; r++) {
       const cell = document.createElement("div");
       cell.className = "cell";
 
-      if (board[r][c] === 1) cell.classList.add("p1");
-      if (board[r][c] === 2) cell.classList.add("p2");
+      const v = board[r][c];
+      if (v === 1) cell.classList.add("p1");
+      if (v === 2) cell.classList.add("p2");
 
-      cell.onclick = () => move(c);
-
-      boardEl.appendChild(cell);
+      colDiv.appendChild(cell);
     }
+
+    colDiv.onclick = () => move(c);
+    boardEl.appendChild(colDiv);
   }
 }
 
 /* =========================
-   GAME LOGIC
+   MOVE SYSTEM (FIXED)
 ========================= */
 
 function move(col) {
-  if (gameOver) return;
+  if (gameOver || aiLocked) return;
 
-  for (let r = ROWS - 1; r >= 0; r--) {
-    if (board[r][col] === 0) {
-      board[r][col] = player;
+  const row = getRow(col);
+  if (row === -1) return;
 
-      if (checkWin(player)) {
-        end(`${player === 1 ? "Red" : "Yellow"} wins`);
-        return;
-      }
+  board[row][col] = player;
 
-      if (getMoves().length === 0) {
-        end("Draw");
-        return;
-      }
+  if (checkWin(player)) {
+    end(`${player === 1 ? "Red" : "Yellow"} wins`);
+    return;
+  }
 
-      player = 3 - player;
-      render();
+  if (getMoves().length === 0) {
+    end("Draw");
+    return;
+  }
 
-      if (mode === "ai" && player === 2) {
-        setTimeout(aiMove, 200);
-      }
+  player = 3 - player;
+  render();
 
-      return;
-    }
+  if (mode === "ai" && player === 2) {
+    aiLocked = true;
+
+    setTimeout(() => {
+      aiMove();
+      aiLocked = false;
+    }, 150);
   }
 }
 
 /* =========================
-   AI (SIMPLE BUT STABLE)
+   AI (SAFE)
 ========================= */
 
 function aiMove() {
   if (gameOver) return;
 
   const moves = getMoves();
-  const choice = moves[Math.floor(Math.random() * moves.length)];
+
+  // simple center bias (more stable than random only)
+  const center = 3;
+  let choice = moves[Math.floor(Math.random() * moves.length)];
+
+  for (const m of moves) {
+    if (Math.abs(m - center) < Math.abs(choice - center)) {
+      choice = m;
+    }
+  }
 
   move(choice);
 }
@@ -104,30 +123,40 @@ function aiMove() {
    HELPERS
 ========================= */
 
+function getRow(col) {
+  for (let r = ROWS - 1; r >= 0; r--) {
+    if (board[r][col] === 0) return r;
+  }
+  return -1;
+}
+
 function getMoves() {
-  return [...Array(COLS).keys()]
-    .filter(c => board[0][c] === 0);
+  return [...Array(COLS).keys()].filter(c => board[0][c] === 0);
 }
 
 function checkWin(p) {
+  // horizontal
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS - 3; c++) {
       if ([0,1,2,3].every(i => board[r][c+i] === p)) return true;
     }
   }
 
+  // vertical
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r < ROWS - 3; r++) {
       if ([0,1,2,3].every(i => board[r+i][c] === p)) return true;
     }
   }
 
+  // diagonal \
   for (let r = 0; r < ROWS - 3; r++) {
     for (let c = 0; c < COLS - 3; c++) {
       if ([0,1,2,3].every(i => board[r+i][c+i] === p)) return true;
     }
   }
 
+  // diagonal /
   for (let r = 0; r < ROWS - 3; r++) {
     for (let c = 3; c < COLS; c++) {
       if ([0,1,2,3].every(i => board[r+i][c-i] === p)) return true;
@@ -138,11 +167,13 @@ function checkWin(p) {
 }
 
 /* =========================
-   END GAME
+   END GAME (FIXED)
 ========================= */
 
 function end(text) {
   gameOver = true;
+  aiLocked = true; // HARD STOP AI QUEUES
+
   resultEl.textContent = text;
   overlay.classList.remove("hidden");
 }
