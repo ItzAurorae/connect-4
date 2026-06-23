@@ -9,36 +9,23 @@
 
 <body class="dark">
 
-  <div id="app">
+  <div class="menu">
+    <h1>Connect 4</h1>
 
-    <header class="menu">
-      <h1>Connect 4</h1>
+    <button onclick="setMode('pvp')">PvP</button>
+    <button onclick="setMode('ai')">Vs AI</button>
+    <button onclick="startGame()">Start</button>
 
-      <div class="controls">
-        <button data-theme="light">Light</button>
-        <button data-theme="dark">Dark</button>
-
-        <button data-mode="pvp">PvP</button>
-        <button data-mode="ai">Vs AI</button>
-
-        <button id="start">Start</button>
-      </div>
-
-      <p id="status">Select mode to begin</p>
-    </header>
-
-    <main id="game">
-      <div id="board"></div>
-      <div id="turn"></div>
-    </main>
-
-    <div id="overlay" class="hidden">
-      <h2 id="result"></h2>
-      <button id="restart">Restart</button>
-    </div>
-
+    <p id="status">Choose mode</p>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <div id="board"></div>
+
+  <div id="overlay" class="hidden">
+    <h2 id="result"></h2>
+    <button onclick="restart()">Restart</button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
