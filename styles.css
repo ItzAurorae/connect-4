@@ -1,43 +1,151 @@
 body {
   margin: 0;
-  font-family: system-ui;
+  font-family: system-ui, Arial, sans-serif;
   text-align: center;
-  background: #111;
-  color: white;
+
+  /* 🌌 Midnight base */
+  background: radial-gradient(circle at top, #0b1020 0%, #05070f 60%, #02030a 100%);
+  color: #d7e1ff;
 }
 
+/* =========================
+   MENU
+========================= */
+
 .menu {
-  padding: 10px;
+  padding: 16px;
 }
+
+.menu h1 {
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #a9c2ff;
+  text-shadow: 0 0 12px rgba(80,120,255,0.4);
+}
+
+button {
+  background: linear-gradient(145deg, #121a33, #0b1020);
+  color: #cfe0ff;
+  border: 1px solid rgba(120,160,255,0.25);
+  padding: 10px 14px;
+  margin: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+}
+
+button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(160,200,255,0.6);
+  box-shadow: 0 0 18px rgba(80,120,255,0.25);
+}
+
+/* =========================
+   BOARD
+========================= */
 
 #board {
   display: grid;
-  grid-template-columns: repeat(7, 70px);
-  gap: 6px;
+  grid-template-columns: repeat(7, 72px);
+  gap: 8px;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 22px;
+
+  padding: 14px;
+  border-radius: 18px;
+
+  background: rgba(10, 14, 30, 0.6);
+  border: 1px solid rgba(120,160,255,0.15);
+  box-shadow: 0 0 40px rgba(40,80,255,0.12);
 }
 
+/* column wrapper (from fixed JS version) */
+.col {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+}
+
+/* cells */
 .cell {
-  width: 70px;
-  height: 70px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: #333;
-  cursor: pointer;
+
+  background: radial-gradient(circle at 30% 30%, #1a2445, #0b1020);
+  border: 1px solid rgba(140,180,255,0.08);
+
+  transition: 0.2s ease;
 }
 
-.p1 { background: red; }
-.p2 { background: gold; }
+.cell:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(90,140,255,0.25);
+}
+
+/* =========================
+   PIECES (NEON STYLE)
+========================= */
+
+.p1 {
+  background: radial-gradient(circle at 30% 30%, #ff4d6d, #7a0015);
+  box-shadow: 0 0 14px rgba(255, 60, 100, 0.35);
+}
+
+.p2 {
+  background: radial-gradient(circle at 30% 30%, #ffd166, #8a6a00);
+  box-shadow: 0 0 14px rgba(255, 210, 90, 0.25);
+}
+
+/* =========================
+   OVERLAY
+========================= */
 
 #overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85);
+
+  background: rgba(2, 4, 12, 0.85);
+  backdrop-filter: blur(10px);
+
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
+#overlay h2 {
+  font-size: 28px;
+  color: #b9ccff;
+  text-shadow: 0 0 18px rgba(120,160,255,0.4);
+}
+
+/* hidden helper */
 .hidden {
   display: none;
+}
+
+/* =========================
+   STATUS TEXT
+========================= */
+
+#status {
+  opacity: 0.8;
+  color: #9fb4ff;
+}
+
+/* =========================
+   OPTIONAL FUTURE GLOW LAYER
+========================= */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(80,120,255,0.08), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(255,80,120,0.06), transparent 45%);
 }
