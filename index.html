@@ -6,48 +6,50 @@
   <title>Connect 4</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="dark-mode">
 
   <button id="mobile-toggle" class="hide-on-desktop">Mobile Mode</button>
-  
-  <!-- Main Menu (visible on desktop) -->
-  <div id="main-menu" class="hide-on-mobile">
+
+  <!-- Main Menu -->
+  <div id="main-menu">
     <h1>Connect 4</h1>
-    
+
     <div class="menu-option">
       <label>Choose Theme:</label>
       <button onclick="setTheme('light')">Light</button>
       <button onclick="setTheme('dark')">Dark</button>
     </div>
-    
+
     <div class="menu-option">
       <label>Game Mode:</label>
       <button onclick="setGameMode('human')">2 Players</button>
       <button onclick="setGameMode('computer')">Vs Comp</button>
     </div>
-    
+
     <div class="menu-option">
       <label>Background Music:</label>
       <button onclick="toggleMusic()">Toggle Music</button>
     </div>
-    
-    <!-- Game Summary Display -->
+
     <div class="menu-option" id="game-summary">
       Game Type: (Not Selected)
     </div>
-    
+
     <button id="start-game" onclick="startGame()" disabled>Start Game</button>
   </div>
 
   <!-- Game Container -->
-  <div id="game-container" style="display: none;">
+  <div id="game-container" style="display:none;">
     <h1>Connect 4</h1>
-    <button id="exit-button" onclick="goToMainMenu()">Exit</button> 
-    <!-- Turn Indicator -->
+
+    <button id="exit-button" onclick="goToMainMenu()">Exit</button>
+
     <div id="turn-indicator">Player 1's Turn</div>
+
     <div id="board"></div>
-    <!-- Win Screen -->
-    <div id="win-container" style="display: none;">
+
+    <div id="win-container" style="display:none;">
       <p id="win-message"></p>
       <p id="game-duration"></p>
       <p id="move-count"></p>
@@ -55,13 +57,16 @@
     </div>
   </div>
 
-    <!-- Footer -->
   <footer>
     <p>&copy; 2025-2026 ItzAurorae. All rights reserved.</p>
-    <p>Created by ItzAurorae. | <a href="https://github.com/ItzAurorae" target="_blank">GitHub</a> | <a href="https://itzauroraeprotfilo.vercel.app/" target="_blank">Protfilo</a> | <a href="https://itzauroraeblog.netlify.app" target="_blank">Blog</a></p>
+    <p>
+      Created by ItzAurorae |
+      <a href="https://github.com/ItzAurorae" target="_blank">GitHub</a> |
+      <a href="https://itzauroraeprotfilo.vercel.app/" target="_blank">Portfolio</a> |
+      <a href="https://itzauroraeblog.netlify.app" target="_blank">Blog</a>
+    </p>
   </footer>
 
-  <!-- Background Music -->
   <audio id="bg-music" loop>
     <source src="background-music.mp3" type="audio/mpeg">
   </audio>
