@@ -1,15 +1,15 @@
-// Global Game Variables
 const ROWS = 6;
 const COLS = 7;
-let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
-let currentPlayer = 1; // Player 1: Human; Player 2: AI
-let moveCount = 0;
-let startTime = Date.now();
-let gameMode = 'human';
-let musicPlaying = false;
-let gameOver = false; // true when game is over
 
-// DOM Elements
+let board;
+let currentPlayer;
+let moveCount;
+let startTime;
+let gameMode = "human";
+let musicPlaying = false;
+let gameOver = false;
+
+// DOM
 const boardElement = document.getElementById("board");
 const winContainer = document.getElementById("win-container");
 const winMessage = document.getElementById("win-message");
@@ -22,151 +22,133 @@ const bgMusic = document.getElementById("bg-music");
 const startGameButton = document.getElementById("start-game");
 const gameSummary = document.getElementById("game-summary");
 
-// AI Helper Functions
-function cloneBoard(board) {
-  return board.map(row => row.slice());
+/* =========================
+   CORE HELPERS
+========================= */
+
+function cloneBoard(b) {
+  return b.map(r => r.slice());
 }
 
-function getValidLocations(board) {
-  let validLocations = [];
+function getValidLocations(b) {
+  let res = [];
   for (let c = 0; c < COLS; c++) {
-    if (board[0][c] === 0) validLocations.push(c); // If the top cell of the column is empty
+    if (b[0][c] === 0) res.push(c);
   }
-  return validLocations;
+  return res;
 }
 
-function getNextOpenRow(board, col) {
+function getNextOpenRow(b, col) {
   for (let r = ROWS - 1; r >= 0; r--) {
-    if (board[r][col] === 0) return r;
+    if (b[r][col] === 0) return r;
   }
   return -1;
 }
 
-function winningMove(board, player) {
-  // Check for horizontal, vertical, and diagonal wins
+function winningMove(b, p) {
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS - 3; c++) {
-      if (board[r][c] === player &&
-          board[r][c + 1] === player &&
-          board[r][c + 2] === player &&
-          board[r][c + 3] === player)
+      if (b[r][c] === p && b[r][c+1] === p && b[r][c+2] === p && b[r][c+3] === p)
         return true;
     }
   }
+
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r < ROWS - 3; r++) {
-      if (board[r][c] === player &&
-          board[r + 1][c] === player &&
-          board[r + 2][c] === player &&
-          board[r + 3][c] === player)
+      if (b[r][c] === p && b[r+1][c] === p && b[r+2][c] === p && b[r+3][c] === p)
         return true;
     }
   }
+
   for (let r = 0; r < ROWS - 3; r++) {
     for (let c = 0; c < COLS - 3; c++) {
-      if (board[r][c] === player &&
-          board[r + 1][c + 1] === player &&
-          board[r + 2][c + 2] === player &&
-          board[r + 3][c + 3] === player)
+      if (b[r][c] === p && b[r+1][c+1] === p && b[r+2][c+2] === p && b[r+3][c+3] === p)
         return true;
     }
   }
+
   for (let r = 0; r < ROWS - 3; r++) {
     for (let c = 3; c < COLS; c++) {
-      if (board[r][c] === player &&
-          board[r + 1][c - 1] === player &&
-          board[r + 2][c - 2] === player &&
-          board[r + 3][c - 3] === player)
+      if (b[r][c] === p && b[r+1][c-1] === p && b[r+2][c-2] === p && b[r+3][c-3] === p)
         return true;
     }
   }
+
   return false;
 }
 
-// Implementing Minimax Algorithm
-function minimax(board, depth, alpha, beta, maximizingPlayer) {
-  let validLocations = getValidLocations(board);
-  const isTerminal = winningMove(board, 1) || winningMove(board, 2) || validLocations.length === 0;
+/* =========================
+   MINIMAX AI
+========================= */
 
-  if (depth === 0 || isTerminal) {
-    if (isTerminal) {
-      if (winningMove(board, 2)) return [null, 100000]; // AI wins
-      else if (winningMove(board, 1)) return [null, -100000]; // Player wins
-      else return [null, 0]; // Draw
-    } else {
-      return [null, 0]; // If no more moves, return neutral result
-    }
+function minimax(b, depth, alpha, beta, maximizing) {
+  const valid = getValidLocations(b);
+  const terminal = winningMove(b, 1) || winningMove(b, 2) || valid.length === 0;
+
+  if (depth === 0 || terminal) {
+    if (winningMove(b, 2)) return [null, 100000];
+    if (winningMove(b, 1)) return [null, -100000];
+    return [null, 0];
   }
 
-  if (maximizingPlayer) {
-    let value = -Infinity;
-    let bestColumn = validLocations[Math.floor(Math.random() * validLocations.length)]; // Fallback to random
+  if (maximizing) {
+    let best = -Infinity;
+    let bestCol = valid[0];
 
-    for (let col of validLocations) {
-      let row = getNextOpenRow(board, col);
-      let tempBoard = cloneBoard(board);
-      tempBoard[row][col] = 2; // Simulate AI move
+    for (let col of valid) {
+      let row = getNextOpenRow(b, col);
+      let temp = cloneBoard(b);
+      temp[row][col] = 2;
 
-      let newScore = minimax(tempBoard, depth - 1, alpha, beta, false)[1]; // Minimize opponent move
-      if (newScore > value) {
-        value = newScore;
-        bestColumn = col;
+      let score = minimax(temp, depth - 1, alpha, beta, false)[1];
+
+      if (score > best) {
+        best = score;
+        bestCol = col;
       }
-      alpha = Math.max(alpha, value);
-      if (alpha >= beta) break; // Prune branches
+
+      alpha = Math.max(alpha, best);
+      if (alpha >= beta) break;
     }
-    return [bestColumn, value];
+
+    return [bestCol, best];
   } else {
-    let value = Infinity;
-    let bestColumn = validLocations[Math.floor(Math.random() * validLocations.length)]; // Fallback to random
+    let best = Infinity;
+    let bestCol = valid[0];
 
-    for (let col of validLocations) {
-      let row = getNextOpenRow(board, col);
-      let tempBoard = cloneBoard(board);
-      tempBoard[row][col] = 1; // Simulate player move
+    for (let col of valid) {
+      let row = getNextOpenRow(b, col);
+      let temp = cloneBoard(b);
+      temp[row][col] = 1;
 
-      let newScore = minimax(tempBoard, depth - 1, alpha, beta, true)[1]; // Maximize AI move
-      if (newScore < value) {
-        value = newScore;
-        bestColumn = col;
+      let score = minimax(temp, depth - 1, alpha, beta, true)[1];
+
+      if (score < best) {
+        best = score;
+        bestCol = col;
       }
-      beta = Math.min(beta, value);
-      if (alpha >= beta) break; // Prune branches
+
+      beta = Math.min(beta, best);
+      if (alpha >= beta) break;
     }
-    return [bestColumn, value];
+
+    return [bestCol, best];
   }
 }
 
-// Update game summary display based on selections
-function updateGameSummary() {
-  if (gameMode === 'human') {
-    gameSummary.textContent = "Game Type: PvP";
-  } else {
-    gameSummary.textContent = "Game Type: PvAI";
-  }
-}
-// Switch between light and dark themes
+/* =========================
+   UI + GAME FLOW
+========================= */
+
 function setTheme(theme) {
-  document.body.classList.remove('dark-mode');
-  document.body.classList.remove('light-mode');
-  document.body.classList.add(theme + '-mode');
-}
-
-// Start the game
-function startGame() {
-  // Hide the start screen
-  document.getElementById('start-screen').classList.add('hide-on-mobile');
-  // Show the main menu
-  document.getElementById('main-menu').classList.remove('hide-on-mobile');
-  // Set the game mode and theme
-  setGameMode('human');
-  setTheme('light');
+  document.body.classList.toggle("dark-mode", theme === "dark");
+  document.body.classList.toggle("light-mode", theme === "light");
 }
 
 function setGameMode(mode) {
   gameMode = mode;
-  startGameButton.disabled = false; // Enable the start button
-  updateGameSummary();
+  startGameButton.disabled = false;
+  gameSummary.textContent = `Game Type: ${mode === "human" ? "PvP" : "PvAI"}`;
 }
 
 function toggleMusic() {
@@ -183,143 +165,135 @@ function startGame() {
 function returnToMainMenu() {
   gameContainer.style.display = "none";
   mainMenu.style.display = "block";
+  resetGame();
 }
 
-// Create board grid
+/* =========================
+   BOARD RENDERING
+========================= */
+
 function createBoard() {
   boardElement.innerHTML = "";
+
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const cell = document.createElement("div");
       cell.classList.add("cell");
-      cell.dataset.column = c;
+
       cell.addEventListener("click", () => {
-        if (!gameOver && !(gameMode === 'computer' && currentPlayer === 2)) {
+        if (!gameOver && !(gameMode === "computer" && currentPlayer === 2)) {
           makeMove(c);
         }
       });
+
       boardElement.appendChild(cell);
     }
   }
 }
 
-// Update turn indicator display
-function updateTurnIndicator() {
-  turnIndicator.textContent = `Player ${currentPlayer}'s Turn`;
+function updateBoard() {
+  const cells = document.querySelectorAll(".cell");
+
+  cells.forEach((cell, i) => {
+    const r = Math.floor(i / COLS);
+    const c = i % COLS;
+
+    cell.classList.remove("player-1", "player-2");
+
+    if (board[r][c] === 1) cell.classList.add("player-1");
+    if (board[r][c] === 2) cell.classList.add("player-2");
+  });
 }
 
-// Check for draw (no valid moves)
-function checkDraw() {
-  return getValidLocations(board).length === 0;
-}
+/* =========================
+   GAME LOGIC
+========================= */
 
-// Make a move in a column
-function makeMove(column) {
+function makeMove(col) {
   if (gameOver) return;
-  for (let row = ROWS - 1; row >= 0; row--) {
-    if (board[row][column] === 0) {
-      board[row][column] = currentPlayer;
+
+  for (let r = ROWS - 1; r >= 0; r--) {
+    if (board[r][col] === 0) {
+      board[r][col] = currentPlayer;
       moveCount++;
+
       updateBoard();
 
       if (winningMove(board, currentPlayer)) {
         gameOver = true;
-        displayWinScreen();
-        return;
-      }
-      if (checkDraw()) {
-        gameOver = true;
-        displayDrawScreen();
+        showEnd("win");
         return;
       }
 
-      currentPlayer = 3 - currentPlayer; // Switch players
-      updateTurnIndicator();
-      if (gameMode === 'computer' && currentPlayer === 2) {
-        setTimeout(aiMove, 500); // AI's turn
+      if (getValidLocations(board).length === 0) {
+        gameOver = true;
+        showEnd("draw");
+        return;
       }
+
+      currentPlayer = 3 - currentPlayer;
+      updateTurn();
+
+      if (gameMode === "computer" && currentPlayer === 2) {
+        setTimeout(aiMove, 300);
+      }
+
       return;
     }
   }
 }
 
 function aiMove() {
-    if (gameOver) return;
-    let column = minimax(board, 5, -Infinity, Infinity, true)[0]; // Using Minimax with depth 5
-    if (column !== null) {
-        makeMove(column);
-    }
+  if (gameOver) return;
+  const [col] = minimax(board, 5, -Infinity, Infinity, true);
+  if (col !== null) makeMove(col);
 }
 
-// Check if a move is valid
-function isValidMove(column) {
-    return column !== null && column >= 0 && column < COLS && board[0][column] === 0;
+/* =========================
+   UI STATE
+========================= */
+
+function updateTurn() {
+  turnIndicator.textContent = `Player ${currentPlayer}'s Turn`;
 }
 
-// Update board UI
-function updateBoard() {
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach((cell, index) => {
-    const row = Math.floor(index / COLS);
-    const col = index % COLS;
-    cell.classList.remove("player-1", "player-2");
-    if (board[row][col] === 1) cell.classList.add("player-1");
-    if (board[row][col] === 2) cell.classList.add("player-2");
-  });
-}
-
-// Display win screen
-function displayWinScreen() {
+function showEnd(type) {
   winContainer.style.display = "block";
-  const endTime = Date.now();
-  const duration = (endTime - startTime) / 1000;
-  gameDuration.textContent = `Duration: ${duration.toFixed(2)} seconds`;
+
+  const duration = (Date.now() - startTime) / 1000;
+
+  gameDuration.textContent = `Duration: ${duration.toFixed(2)}s`;
   moveCountDisplay.textContent = `Moves: ${moveCount}`;
-  winMessage.textContent = `Player ${currentPlayer} Wins!`;
+
+  winMessage.textContent =
+    type === "win"
+      ? `Player ${currentPlayer} Wins!`
+      : `It's a Draw!`;
 }
 
-// Display draw screen
-function displayDrawScreen() {
-  winContainer.style.display = "block";
-  const endTime = Date.now();
-  const duration = (endTime - startTime) / 1000;
-  gameDuration.textContent = `Duration: ${duration.toFixed(2)} seconds`;
-  moveCountDisplay.textContent = `Moves: ${moveCount}`;
-  winMessage.textContent = `It's a Draw!`;
-}
-
-// Reset game state
 function resetGame() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
   currentPlayer = 1;
   moveCount = 0;
   startTime = Date.now();
   gameOver = false;
+
   winContainer.style.display = "none";
+
   createBoard();
-  updateTurnIndicator();
+  updateBoard();
+  updateTurn();
 }
 
 function goToMainMenu() {
   gameContainer.style.display = "none";
   mainMenu.style.display = "block";
-  resetGame(); // Reset the game when exiting
-}
-function detectDevice() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  const isMobile = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
-
-  if (isMobile) {
-    document.body.classList.add('mobile');
-    document.body.classList.remove('desktop');
-  } else {
-    document.body.classList.add('desktop');
-    document.body.classList.remove('mobile');
-  }
+  resetGame();
 }
 
-// Run detection on page load
-window.addEventListener('load', detectDevice);
+/* =========================
+   INIT
+========================= */
 
-// Initialize board on page load
 createBoard();
+resetGame();
