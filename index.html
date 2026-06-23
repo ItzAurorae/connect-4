@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Connect 4 Modern</title>
+  <title>Connect 4</title>
+
   <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="dark">
+<body>
 
+  <!-- MENU -->
   <div class="menu">
     <h1>Connect 4</h1>
 
@@ -16,16 +18,20 @@
     <button onclick="setMode('ai')">Vs AI</button>
     <button onclick="startGame()">Start</button>
 
-    <p id="status">Choose mode</p>
+    <p id="status">Choose a mode</p>
   </div>
 
+  <!-- GAME BOARD -->
   <div id="board"></div>
 
+  <!-- WIN / DRAW OVERLAY -->
   <div id="overlay" class="hidden">
     <h2 id="result"></h2>
     <button onclick="restart()">Restart</button>
   </div>
 
+  <!-- GAME SCRIPT -->
   <script src="script.js"></script>
+
 </body>
 </html>
