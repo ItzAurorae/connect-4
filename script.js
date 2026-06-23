@@ -5,39 +5,33 @@ let board;
 let player;
 let mode = "pvp";
 let gameOver = false;
-let aiThinking = false;
+let aiLock = false;
 
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("status");
 const overlay = document.getElementById("overlay");
 const resultEl = document.getElementById("result");
 
-/* =========================
-   INIT
-========================= */
+/* ================= INIT ================= */
 
 function reset() {
   board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
   player = 1;
   gameOver = false;
-  aiThinking = false;
+  aiLock = false;
 
   overlay.classList.add("hidden");
   render();
 }
 
-/* =========================
-   MODE
-========================= */
+/* ================= MODE ================= */
 
 function setMode(m) {
   mode = m;
   statusEl.textContent = `Mode: ${m.toUpperCase()}`;
 }
 
-/* =========================
-   RENDER (ANIMATION SAFE)
-========================= */
+/* ================= RENDER ================= */
 
 function render() {
   boardEl.innerHTML = "";
@@ -56,145 +50,63 @@ function render() {
       col.appendChild(cell);
     }
 
-    col.onclick = () => dropPiece(c);
+    col.onclick = () => move(c);
     boardEl.appendChild(col);
   }
 }
 
-/* =========================
-   DROP SYSTEM (WITH ANIMATION)
-========================= */
+/* ================= MOVE ================= */
 
-function dropPiece(col) {
-  if (gameOver || aiThinking) return;
+function move(col) {
+  if (gameOver || aiLock) return;
 
   const row = getRow(col);
   if (row === -1) return;
 
-  animateDrop(col, row, player);
-
   board[row][col] = player;
 
-  if (checkWin(player)) return end(`${playerName(player)} wins`);
+  if (checkWin(player)) return end(`${name(player)} wins`);
   if (getMoves().length === 0) return end("Draw");
 
   player = 3 - player;
-
   render();
 
   if (mode === "ai" && player === 2) {
-    aiMove();
+    aiLock = true;
+    setTimeout(aiMove, 180);
   }
 }
 
-/* =========================
-   DROP ANIMATION (NEW)
-========================= */
-
-function animateDrop(col, row, p) {
-  const colEl = boardEl.children[col];
-  const cellEl = colEl.children[ROWS - 1 - row];
-
-  const ghost = document.createElement("div");
-  ghost.className = `ghost ${p === 1 ? "p1" : "p2"}`;
-
-  document.body.appendChild(ghost);
-
-  const rect = cellEl.getBoundingClientRect();
-
-  ghost.style.left = rect.left + "px";
-  ghost.style.top = "-80px";
-
-  requestAnimationFrame(() => {
-    ghost.style.top = rect.top + "px";
-  });
-
-  setTimeout(() => ghost.remove(), 350);
-}
-
-/* =========================
-   AI (MINIMAX - REAL)
-========================= */
+/* ================= AI (MINIMAX LIGHT) ================= */
 
 function aiMove() {
   if (gameOver) return;
 
-  aiThinking = true;
-  statusEl.textContent = "AI thinking...";
-
-  setTimeout(() => {
-    const col = minimaxRoot(board, 5, true).col;
-
-    aiThinking = false;
-    dropPiece(col);
-  }, 250);
+  const col = bestMove(board);
+  aiLock = false;
+  move(col);
 }
 
-/* =========================
-   MINIMAX CORE
-========================= */
-
-function minimaxRoot(boardState, depth, isAI) {
-  const moves = getMoves(boardState);
-
-  let bestMove = moves[0];
-  let bestScore = -Infinity;
+function bestMove(b) {
+  const moves = getMoves(b);
+  let best = moves[0];
+  let score = -Infinity;
 
   for (const col of moves) {
-    const row = getRowInBoard(boardState, col);
-    const copy = clone(boardState);
+    const row = getRowInBoard(b, col);
+    const copy = clone(b);
 
     copy[row][col] = 2;
+    const s = evaluate(copy);
 
-    const score = minimax(copy, depth - 1, false);
-
-    if (score > bestScore) {
-      bestScore = score;
-      bestMove = col;
+    if (s > score) {
+      score = s;
+      best = col;
     }
   }
 
-  return { col: bestMove, score: bestScore };
+  return best;
 }
-
-function minimax(boardState, depth, maximizing) {
-  if (depth === 0) return evaluate(boardState);
-
-  if (checkWinBoard(boardState, 2)) return 9999;
-  if (checkWinBoard(boardState, 1)) return -9999;
-
-  const moves = getMoves(boardState);
-
-  if (maximizing) {
-    let best = -Infinity;
-
-    for (const col of moves) {
-      const row = getRowInBoard(boardState, col);
-      const copy = clone(boardState);
-      copy[row][col] = 2;
-
-      best = Math.max(best, minimax(copy, depth - 1, false));
-    }
-
-    return best;
-  } else {
-    let best = Infinity;
-
-    for (const col of moves) {
-      const row = getRowInBoard(boardState, col);
-      const copy = clone(boardState);
-      copy[row][col] = 1;
-
-      best = Math.min(best, minimax(copy, depth - 1, true));
-    }
-
-    return best;
-  }
-}
-
-/* =========================
-   HEURISTIC EVALUATION
-========================= */
 
 function evaluate(b) {
   let score = 0;
@@ -207,9 +119,7 @@ function evaluate(b) {
   return score;
 }
 
-/* =========================
-   HELPERS
-========================= */
+/* ================= HELPERS ================= */
 
 function getRow(col) {
   for (let r = ROWS - 1; r >= 0; r--) {
@@ -233,59 +143,41 @@ function clone(b) {
   return b.map(r => r.slice());
 }
 
-/* =========================
-   WIN CHECK
-========================= */
+/* ================= WIN CHECK ================= */
 
 function checkWin(p) {
-  return checkWinBoard(board, p);
+  return check(board, p);
 }
 
-function checkWinBoard(b, p) {
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS - 3; c++) {
+function check(b, p) {
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS - 3; c++)
       if ([0,1,2,3].every(i => b[r][c+i] === p)) return true;
-    }
-  }
 
-  for (let c = 0; c < COLS; c++) {
-    for (let r = 0; r < ROWS - 3; r++) {
+  for (let c = 0; c < COLS; c++)
+    for (let r = 0; r < ROWS - 3; r++)
       if ([0,1,2,3].every(i => b[r+i][c] === p)) return true;
-    }
-  }
 
-  for (let r = 0; r < ROWS - 3; r++) {
-    for (let c = 0; c < COLS - 3; c++) {
+  for (let r = 0; r < ROWS - 3; r++)
+    for (let c = 0; c < COLS - 3; c++)
       if ([0,1,2,3].every(i => b[r+i][c+i] === p)) return true;
-    }
-  }
 
-  for (let r = 0; r < ROWS - 3; r++) {
-    for (let c = 3; c < COLS; c++) {
+  for (let r = 0; r < ROWS - 3; r++)
+    for (let c = 3; c < COLS; c++)
       if ([0,1,2,3].every(i => b[r+i][c-i] === p)) return true;
-    }
-  }
 
   return false;
 }
 
-/* =========================
-   END GAME
-========================= */
+/* ================= END ================= */
 
 function end(text) {
   gameOver = true;
-  resultEl.textContent = text;
   overlay.classList.remove("hidden");
+  resultEl.textContent = text;
 }
 
-/* =========================
-   UI
-========================= */
-
-function playerName(p) {
-  return p === 1 ? "Red" : "Yellow";
-}
+/* ================= CONTROL ================= */
 
 function startGame() {
   reset();
@@ -295,8 +187,12 @@ function restart() {
   reset();
 }
 
-/* =========================
-   BOOT
-========================= */
+/* ================= UTIL ================= */
+
+function name(p) {
+  return p === 1 ? "Red" : "Yellow";
+}
+
+/* ================= BOOT ================= */
 
 reset();
